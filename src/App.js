@@ -1,24 +1,48 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { BrowserRouter as Router, useLocation  } from 'react-router-dom';
+import Dashboard from './components/DashboardPage.js';
+import TransactionsPage from './components/TransactionsPage.js';
+import TransfersPage from './components/TransfersPage.js';
+import HomePage from './components/HomePage';
+import RegisterPage from './components/RegisterPage';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import Container from '@mui/material/Container';
+import BankAccountDetailsPage from './components/BankAccountDetailsPage';
+import BankAccountsPage from './components/BankAccountsPage.js';
 
-function App() {
+
+
+function AppContent() {
+  const location = useLocation();  // Now this is safe to use
+  const noHeaderPaths = ['/', '/register'];
+  const showHeader = !noHeaderPaths.includes(location.pathname);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+      <>
+          {showHeader && <Header />}
+          <Container component="main" maxWidth="xl" style={{ height: '100vh' }}>
+              {location.pathname === '/' && <HomePage />}
+              {location.pathname === '/register' && <RegisterPage />}
+              {location.pathname === '/dashboard' && <Dashboard />}
+              {location.pathname === '/transfers' && <TransfersPage />}
+              {location.pathname === '/transactions' && <TransactionsPage />}
+              {location.pathname === '/bank-accounts/:accountId' && <BankAccountDetailsPage />}
+              {location.pathname === '/bank-accounts' && <BankAccountsPage />}
+              {/* Add more routes as needed */}
+          </Container>
+          <Footer />
+      </>
+  );
+}
+function App() {
+
+
+
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
 
