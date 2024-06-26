@@ -13,17 +13,17 @@ function RegisterPage() {
 
   const handleRegister = async (event) => {
     event.preventDefault();
-    const { firstName, lastName, email, password } = event.target.elements;
     
     try {
       await axios.post('http://localhost:5229/api/Users/register', {
-        firstName: firstName.value,
-        lastName: lastName.value,
-        email: email.value,
-        password: password.value
+        firstName,
+        lastName,
+        email,
+        password
       });
-      navigate('/dashboard');
+      navigate('/');
     } catch (err) {
+      console.error('Error details:', err.response || err.message || err);
       setError('Registration failed. Email might be already in use or other registration error.');
     }
   };
