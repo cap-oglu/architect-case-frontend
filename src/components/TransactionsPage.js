@@ -11,11 +11,13 @@ function TransactionsPage() {
   const [newTransaction, setNewTransaction] = useState({
     description: '',
     amount: '',
-    transactionDate: new Date().toISOString().slice(0, 10), // today's date in YYYY-MM-DD format
-    BankAccountId: ''  // Assuming a default or user-selected value might be set here
+    transactionDate: new Date().toISOString().slice(0, 10),
+    bankAccountId: ''
   });
   const [editId, setEditId] = useState(null);
-  const [editFormData, setEditFormData] = useState({ description: '', amount: '', transactionDate: '', BankAccountId: '' });
+  const [editFormData, setEditFormData] = useState({ description: '', amount: '', transactionDate: '', bankAccountId: '' });
+  const [filterDate, setFilterDate] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,7 +50,7 @@ function TransactionsPage() {
       description: transaction.description,
       amount: transaction.amount,
       transactionDate: transaction.transactionDate.slice(0, 10),
-      BankAccountId: transaction.BankAccountId
+      bankAccountId: transaction.bankAccountId
     });
   };
 
@@ -78,18 +80,24 @@ function TransactionsPage() {
   const handleAdd = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post('http://localhost:5229/api/transactions', {
+      await axios.post('http://localhost:5229/api/transactions', {
         ...newTransaction,
         amount: parseFloat(newTransaction.amount)
       }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
-      setTransactions([...transactions, data]);
-      setNewTransaction({ description: '', amount: '', transactionDate: new Date().toISOString().slice(0, 10), BankAccountId: '' });
+      setTransactions([...transactions, newTransaction]); // Consider fetching the list again to ensure accuracy
+      setNewTransaction({ description: '', amount: '', transactionDate: new Date().toISOString().slice(0, 10), bankAccountId: '' });
     } catch (error) {
       console.error('Error adding transaction:', error);
     }
   };
+
+  // Apply the filters to the transactions list before rendering
+  const filteredTransactions = transactions.filter(transaction =>
+    (!filterDate || transaction.transactionDate.slice(0, 10) === filterDate) &&
+    (!filterCategory || transaction.category === filterCategory)
+  );
 
   return (
     <Container>
@@ -100,28 +108,41 @@ function TransactionsPage() {
         <TextField label="Description" value={newTransaction.description} onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })} required margin="normal" />
         <TextField label="Amount" value={newTransaction.amount} onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })} type="number" required margin="normal" />
         <TextField label="Date" value={newTransaction.transactionDate} onChange={(e) => setNewTransaction({ ...newTransaction, transactionDate: e.target.value })} type="date" required margin="normal" />
-        <TextField label="Bank Account ID" value={newTransaction.BankAccountId} onChange={(e) => setNewTransaction({ ...newTransaction, BankAccountId: e.target.value })} type="number" required margin="normal" />
-        <Button
-          type="submit"
-          color="primary"
-          variant="contained"
-          style={{ marginTop: '25px', marginLeft: '20px' }} // You can adjust the value to better fit your design
-        >Add </Button>
+        <TextField label="Bank Account ID" value={newTransaction.bankAccountId} onChange={(e) => setNewTransaction({ ...newTransaction, bankAccountId: e.target.value })} type="number" required margin="normal" />
+        <Button type="submit" color="primary" variant="contained" style={{ marginTop: '25px', marginLeft: '20px' }}>Add </Button>
       </Box>
+      <Box component="form" noValidate autoComplete="off" onSubmit={e => e.preventDefault()}>
+        <TextField
+          label="Filter Date"
+          type="date"
+          value={filterDate}
+          onChange={e => setFilterDate(e.target.value)}
+          margin="normal"
+          fullWidth
+        />
+        <TextField
+          label="Category"
+          value={filterCategory}
+          onChange={e => setFilterCategory(e.target.value)}
+          margin="normal"
+          fullWidth
+        />
+      </Box>
+
       <List>
-        {transactions.map((transaction) => (
+        {filteredTransactions.map((transaction) => (
           transaction.id === editId ? (
             <ListItem key={transaction.id}>
               <TextField label="Description" value={editFormData.description} onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })} margin="normal" />
               <TextField label="Amount" value={editFormData.amount} onChange={(e) => setEditFormData({ ...editFormData, amount: e.target.value })} type="number" margin="normal" />
               <TextField label="Date" value={editFormData.transactionDate} onChange={(e) => setEditFormData({ ...editFormData, transactionDate: e.target.value })} type="date" margin="normal" />
-              <TextField label="Bank Account ID" value={editFormData.BankAccountId} onChange={(e) => setEditFormData({ ...editFormData, BankAccountId: e.target.value })} type="number" margin="normal" />
+              <TextField label="Bank Account ID" value={editFormData.bankAccountId} onChange={(e) => setEditFormData({ ...editFormData, bankAccountId: e.target.value })} type="number" margin="normal" />
               <IconButton onClick={() => handleSave(transaction.id)}><SaveIcon /></IconButton>
               <IconButton onClick={handleCancel}><CancelIcon /></IconButton>
             </ListItem>
           ) : (
             <ListItem key={transaction.id}>
-              <ListItemText primary={`${transaction.description} - $${transaction.amount} on ${transaction.transactionDate.slice(0, 10)}`} />
+              <ListItemText primary={`${transaction.description} - $${transaction.amount} on ${transaction.transactionDate.slice(0, 10)} with account ID ${transaction.bankAccountId}`} />
               <IconButton onClick={() => handleEdit(transaction)}><EditIcon /></IconButton>
               <IconButton onClick={() => handleDelete(transaction.id)}><DeleteIcon /></IconButton>
             </ListItem>
@@ -133,4 +154,3 @@ function TransactionsPage() {
 }
 
 export default TransactionsPage;
-
