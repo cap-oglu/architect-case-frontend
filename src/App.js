@@ -8,8 +8,8 @@ import RegisterPage from './components/RegisterPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Container from '@mui/material/Container';
-import BankAccountDetailsPage from './components/BankAccountDetailsPage';
 import BankAccountsPage from './components/BankAccountsPage.js';
+import ProfilePage from './components/ProfilePage.js';
 
 
 
@@ -27,8 +27,8 @@ function AppContent() {
               {location.pathname === '/dashboard' && <Dashboard />}
               {location.pathname === '/transfers' && <TransfersPage />}
               {location.pathname === '/transactions' && <TransactionsPage />}
-              {location.pathname === '/bank-accounts/:accountId' && <BankAccountDetailsPage />}
               {location.pathname === '/bank-accounts' && <BankAccountsPage />}
+              {location.pathname === '/profile' && <ProfilePage />}
               {/* Add more routes as needed */}
           </Container>
           <Footer />
